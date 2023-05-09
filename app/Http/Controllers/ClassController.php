@@ -24,4 +24,28 @@ class ClassController extends Controller
         // return response()->json($class);
         return new classResource($class);
     }
+
+    public function store(Request $request)
+    {
+
+        $validated = $request->validate([
+            'name' => 'required|max:255',
+            'description' => 'required'
+        ]);
+
+
+        $class = Class_model::create($request->all());
+
+        return new classResource($class);
+    }
+
+    public function delete($id)
+    {
+
+        $class = Class_model::findOrFail($id);
+
+        $class->delete();
+
+        return new classResource($class);
+    }
 }

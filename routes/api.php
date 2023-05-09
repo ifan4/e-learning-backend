@@ -24,6 +24,8 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
+Route::post('/authentication/login', [UserController::class, 'login']);
+
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/authentication/logout', [UserController::class, 'logout']);
     Route::get('/authentication/me', [UserController::class, 'myData']);
@@ -31,13 +33,21 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/quizzes', [QuizController::class, 'index']);
     Route::get('/quizzes/{materi_id}', [QuizController::class, 'showQuizOnMateri']);
     Route::get('/quiz/{quiz_id}', [QuizController::class, 'showQuiz']);
+    Route::post('/quiz/add', [QuizController::class, 'store']);
+    Route::delete('/quiz/delete/{id}', [QuizController::class, 'delete']);
 
     Route::get('/quizScores', [ScoreController::class, 'index']);
     Route::get('/quizScores/{quiz_id}/{user_id}', [ScoreController::class, 'showScore']);
     Route::get('/quizScores/{materi_id}', [ScoreController::class, 'showScore']);
-});
+    Route::post('/quizScores/add', [ScoreController::class, 'addScore']);
+    Route::patch('/quizScores/update/{score_id}', [ScoreController::class, 'update']);
 
-Route::post('/authentication/login', [UserController::class, 'login']);
+    Route::post('/addClass', [ClassController::class, 'store']);
+    Route::delete('/class/delete/{id}', [ClassController::class, 'delete']);
+
+    Route::post('/materi/add', [MateriController::class, 'store']);
+    Route::delete('/materi/delete/{id}', [QuizController::class, 'delete']);
+});
 
 
 Route::get('/class', [ClassController::class, 'index']);

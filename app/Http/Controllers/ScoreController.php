@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\quizResource;
 use App\Http\Resources\scoreResource;
 use App\Models\quiz;
 use App\Models\quizScore;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ScoreController extends Controller
 {
@@ -73,5 +75,44 @@ class ScoreController extends Controller
         ], 404);
     }
 
-    //showing scores based on materi_id and 
+    //add score to user who have done with their quiz
+    public function addScore(Request $request)
+    {
+        $validated = $request->validate([
+            'quiz_id' => 'required'
+        ]);
+
+        $correct_answer = quiz::findOrFail($request->quiz_id)->answer;
+        $user_answer = $request->answer;
+
+        ($correct_answer === $user_answer)
+            ? $request['score'] = 25
+            : $request['score'] = 0;
+
+        $request['user_id'] = Auth::user()->id;
+
+        $score = quizScore::create($request->all());
+
+        return new scoreResource($score->loadMissing(['user:id,first_name', 'quiz']));
+    }
+
+    //update score when user changed the quiz answer  
+    public function update(Request $request, $score_id)
+    {
+        $validated = $request->validate([
+            'quiz_id' => 'required'
+        ]);
+
+        $correct_answer = quiz::findOrFail($request->quiz_id)->answer;
+        $user_answer = $request->answer;
+
+        ($correct_answer === $user_answer)
+            ? $request['score'] = 25
+            : $request['score'] = 0;
+
+        $score = quizScore::findOrFail($score_id);
+        $score->update($request->all());
+
+        return new scoreResource($score->loadMissing(['user:id,first_name', 'quiz']));
+    }
 }

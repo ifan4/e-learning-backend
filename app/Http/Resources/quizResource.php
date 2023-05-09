@@ -14,6 +14,16 @@ class quizResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'question' => $this->question,
+            'opsi_a' => $this->opsi_a,
+            'opsi_b' => $this->opsi_b,
+            'opsi_c' => $this->opsi_c,
+            'opsi_d' => $this->opsi_d,
+            'opsi_e' => $this->opsi_e,
+            'answer' => $this->answer,
+            'materi' => $this->materi
+        ];
     }
 }

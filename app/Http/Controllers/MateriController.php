@@ -24,4 +24,17 @@ class MateriController extends Controller
 
         return new materiResource($materi);
     }
+
+    public function store(Request $request)
+    {
+
+        $validate = $request->validate([
+            'title' => 'required|max:255',
+            'description' => 'required',
+        ]);
+
+        $materi = Materi::create($request->all());
+
+        return new materiResource($materi);
+    }
 }
