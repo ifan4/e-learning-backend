@@ -59,6 +59,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{materi_id}', [ScoreController::class, 'showScore']);
         Route::post('/add', [ScoreController::class, 'addScore']);
         Route::patch('/update/{score_id}', [ScoreController::class, 'update']);
+
+        Route::post('/addAllAnswers/{materi_id}', [ScoreController::class, 'addAllAnswers']);
     });
 });
 

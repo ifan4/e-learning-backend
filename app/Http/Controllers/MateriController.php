@@ -38,7 +38,7 @@ class MateriController extends Controller
         return new materiResource($materi->loadMissing('class:id,name,description'));
     }
 
-    //needing fix on nested materi resource
+    //fix needed on nested materi resource
     public function update(Request $request, $id)
     {
         $validated = $request->validate([

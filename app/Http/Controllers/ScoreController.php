@@ -61,11 +61,11 @@ class ScoreController extends Controller
     }
 
     //showing score based on quiz_id and also user_id 
-    public function showScore($quiz_id, $user_id)
+    public function showScore($quiz_id)
     {
         $score = quizScore::where([
             ['quiz_id', $quiz_id],
-            ['user_id', $user_id]
+            ['user_id', Auth::user()->id]
         ])->get()->first();
 
 
@@ -75,6 +75,32 @@ class ScoreController extends Controller
         ], 404);
     }
 
+    //This function usable to adding score for general
+    public function addScoreForAll(
+        $user_answer,
+        $quiz_id
+    ) {
+        //define first
+        $request = [];
+        $request['answer'] = $user_answer;
+        $request['quiz_id'] = $quiz_id;
+        $request['score'] = 0;
+
+        //find the right answer
+        $correct_answer = quiz::findOrFail($quiz_id)->answer;
+
+        //calculating user score based his answer
+        ($correct_answer === $user_answer)
+            ? $request['score'] = 25
+            : $request['score'] = 0;
+
+        $request['user_id'] = Auth::user()->id;
+
+        $score = quizScore::create($request);
+
+        return $score;
+    }
+
     //add score to user who have done with their quiz
     public function addScore(Request $request)
     {
@@ -82,19 +108,34 @@ class ScoreController extends Controller
             'quiz_id' => 'required'
         ]);
 
-        $correct_answer = quiz::findOrFail($request->quiz_id)->answer;
-        $user_answer = $request->answer;
-
-        ($correct_answer === $user_answer)
-            ? $request['score'] = 25
-            : $request['score'] = 0;
-
-        $request['user_id'] = Auth::user()->id;
-
-        $score = quizScore::create($request->all());
+        //Call general function to add data
+        $score = $this->addScoreForAll(
+            $request->answer,
+            $request->quiz_id
+        );
 
         return new scoreResource($score->loadMissing(['user:id,first_name', 'quiz']));
     }
+
+    public function addAllAnswers(Request $request, $materi_id)
+    {
+        $validated = $request->validate([
+            'answers' => 'required|array|min:4',
+        ]);
+
+        $scores = array();
+
+        foreach ($request->answers as $answer) {
+
+            $scores[] = $this->addScoreForAll($answer["answer"], $answer["quiz_id"]);
+        }
+
+        return response()->json([
+            'message' => 'Answers Added Successfully',
+            'data' => $scores
+        ]);
+    }
+
 
     //update score when user changed the quiz answer  
     public function update(Request $request, $score_id)
