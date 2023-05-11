@@ -27,31 +27,47 @@ use Illuminate\Support\Facades\Route;
 Route::post('/authentication/login', [UserController::class, 'login']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/authentication/logout', [UserController::class, 'logout']);
-    Route::get('/authentication/me', [UserController::class, 'myData']);
+    Route::prefix('authentication')->group(function () {
+        Route::get('/logout', [UserController::class, 'logout']);
+        Route::get('/me', [UserController::class, 'myData']);
+    });
 
-    Route::get('/quizzes', [QuizController::class, 'index']);
-    Route::get('/quizzes/{materi_id}', [QuizController::class, 'showQuizOnMateri']);
-    Route::get('/quiz/{quiz_id}', [QuizController::class, 'showQuiz']);
-    Route::post('/quiz/add', [QuizController::class, 'store']);
-    Route::delete('/quiz/delete/{id}', [QuizController::class, 'delete']);
+    Route::prefix('class')->group(function () {
+        Route::post('/add', [ClassController::class, 'store']);
+        Route::delete('/delete/{id}', [ClassController::class, 'delete']);
+        Route::patch('/update/{class_id}', [ClassController::class, 'update']);
+    });
 
-    Route::get('/quizScores', [ScoreController::class, 'index']);
-    Route::get('/quizScores/{quiz_id}/{user_id}', [ScoreController::class, 'showScore']);
-    Route::get('/quizScores/{materi_id}', [ScoreController::class, 'showScore']);
-    Route::post('/quizScores/add', [ScoreController::class, 'addScore']);
-    Route::patch('/quizScores/update/{score_id}', [ScoreController::class, 'update']);
+    Route::prefix('materi')->group(function () {
+        Route::post('/add', [MateriController::class, 'store']);
+        Route::delete('/delete/{id}', [MateriController::class, 'delete']);
+        Route::patch('/update/{materi_id}', [MateriController::class, 'update']);
+    });
 
-    Route::post('/addClass', [ClassController::class, 'store']);
-    Route::delete('/class/delete/{id}', [ClassController::class, 'delete']);
+    Route::prefix('quizzes')->group(function () {
+        Route::get('/', [QuizController::class, 'index']);
+        Route::get('/materi/{materi_id}', [QuizController::class, 'showQuizOnMateri']);
+        Route::get('/{quiz_id}', [QuizController::class, 'showQuiz']);
+        Route::post('/add', [QuizController::class, 'store']);
+        Route::delete('/delete/{id}', [QuizController::class, 'delete']);
+        Route::patch('/update/{quiz_id}', [QuizController::class, 'update']);
+    });
 
-    Route::post('/materi/add', [MateriController::class, 'store']);
-    Route::delete('/materi/delete/{id}', [QuizController::class, 'delete']);
+    Route::prefix('quizScores')->group(function () {
+        Route::get('/', [ScoreController::class, 'index']);
+        Route::get('/{quiz_id}/{user_id}', [ScoreController::class, 'showScore']);
+        Route::get('/{materi_id}', [ScoreController::class, 'showScore']);
+        Route::post('/add', [ScoreController::class, 'addScore']);
+        Route::patch('/update/{score_id}', [ScoreController::class, 'update']);
+    });
 });
 
+Route::prefix('class')->group(function () {
+    Route::get('/', [ClassController::class, 'index']);
+    Route::get('/{id}', [ClassController::class, 'showDetail']);
+});
 
-Route::get('/class', [ClassController::class, 'index']);
-Route::get('/class/{id}', [ClassController::class, 'showDetail']);
-
-Route::get('/{class_id}/materi', [MateriController::class, 'index']);
-Route::get('/materi/{materi_id}', [MateriController::class, 'showMateri']);
+Route::prefix('materi')->group(function () {
+    Route::get('/classes/{class_id}', [MateriController::class, 'index']);
+    Route::get('/{materi_id}', [MateriController::class, 'showMateri']);
+});

@@ -46,6 +46,22 @@ class QuizController extends Controller
         return new quizResource($quiz->loadMissing('materi:id,title'));
     }
 
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'materi_id' => 'required',
+            'question' => 'required',
+            'opsi_a' => 'required',
+            'opsi_b' => 'required',
+            'answer' => 'required'
+        ]);
+
+        $quiz = quiz::findOrFail($id);
+        $quiz->update($request->all());
+
+        return new quizResource($quiz->loadMissing('materi:id,title'));
+    }
+
     public function delete($id)
     {
         $quiz = quiz::findOrFail($id);

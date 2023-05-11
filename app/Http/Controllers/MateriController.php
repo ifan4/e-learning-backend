@@ -35,6 +35,29 @@ class MateriController extends Controller
 
         $materi = Materi::create($request->all());
 
-        return new materiResource($materi);
+        return new materiResource($materi->loadMissing('class:id,name,description'));
+    }
+
+    //needing fix on nested materi resource
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'title' => 'required|max:255',
+            'description' => 'required',
+        ]);
+
+        $materi = Materi::findOrFail($id);
+        $materi->update($request->all());
+
+        return new materiResource($materi->loadMissing('class:id,name,description'));
+    }
+
+    public function delete($id)
+    {
+        $materi = Materi::findOrFail($id);
+
+        $materi->delete();
+
+        return new materiResource($materi->loadMissing('class:id,name,description'));
     }
 }

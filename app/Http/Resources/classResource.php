@@ -17,7 +17,9 @@ class classResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'description' => $this->description
+            'description' => $this->description,
+            'created_at' => $this->created_at,
+            'materis' => $this->whenLoaded('materis')
         ];
     }
 }

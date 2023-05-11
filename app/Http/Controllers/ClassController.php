@@ -8,21 +8,23 @@ use Illuminate\Http\Request;
 
 class ClassController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $classes = Class_model::all();
 
-        // return response()->json(['data' => $classes]);
-        return classResource::collection($classes);
+        $classes = Class_model::all();
+        $withMateris = $request->with_materis;
+
+        return classResource::collection(($withMateris === 'true') ? $classes->loadMissing('materis') : $classes);
     }
 
-    public function showDetail($id)
+    public function showDetail(Request $request, $id)
     {
 
         $class = Class_model::findOrFail($id);
+        $withMateris = $request->with_materis;
 
         // return response()->json($class);
-        return new classResource($class);
+        return new classResource(($withMateris === 'true') ? $class->loadMissing('materis') : $class);
     }
 
     public function store(Request $request)
@@ -35,6 +37,20 @@ class ClassController extends Controller
 
 
         $class = Class_model::create($request->all());
+
+        return new classResource($class);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'name' => 'required|max:255',
+            'description' => 'required'
+        ]);
+
+        $class = Class_model::findOrFail($id);
+
+        $class->update($request->all());
 
         return new classResource($class);
     }
