@@ -19,13 +19,19 @@ class UserController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
+
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
+            dd('masuk');
         }
-
         return $user->createToken("token")->plainTextToken;
+
+        return response()->json([
+            'data' => $user->loadMissing('role:id,name'),
+            'accessToken' => $user->createToken("token")->plainTextToken
+        ]);
     }
 
 
@@ -39,6 +45,7 @@ class UserController extends Controller
 
     public function myData(Request $request)
     {
-        return response()->json(Auth::user());
+        $user = Auth::User()->loadMissing("role:id,name");
+        return response()->json($user);
     }
 }

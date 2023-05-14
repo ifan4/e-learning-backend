@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ScoreController extends Controller
 {
+    public $scores = 0;
 
     public function index(Request $request)
     {
@@ -60,13 +61,14 @@ class ScoreController extends Controller
         ], 404);
     }
 
-    //showing score based on quiz_id and also user_id 
+    //showing score based on quiz_id
     public function showScore($quiz_id)
     {
         $score = quizScore::where([
             ['quiz_id', $quiz_id],
             ['user_id', Auth::user()->id]
         ])->get()->first();
+
 
 
         return (isset($score)) ? new scoreResource($score) : response([
@@ -95,6 +97,7 @@ class ScoreController extends Controller
             : $request['score'] = 0;
 
         $request['user_id'] = Auth::user()->id;
+        $this->scores += $request['score'];
 
         $score = quizScore::create($request);
 
@@ -117,22 +120,27 @@ class ScoreController extends Controller
         return new scoreResource($score->loadMissing(['user:id,first_name', 'quiz']));
     }
 
+    //add all answers from users and it will calculate the score directly 
     public function addAllAnswers(Request $request, $materi_id)
     {
         $validated = $request->validate([
             'answers' => 'required|array|min:4',
+            'answers.*.quiz_id' => 'required',
+            'answers.*.answer' => 'required'
         ]);
 
         $scores = array();
 
+        //need looping for input all answers (in array) 
         foreach ($request->answers as $answer) {
-
+            //Call general function to add data
             $scores[] = $this->addScoreForAll($answer["answer"], $answer["quiz_id"]);
         }
 
         return response()->json([
             'message' => 'Answers Added Successfully',
-            'data' => $scores
+            'score_result' => $this->scores,
+            'data' => $scores,
         ]);
     }
 

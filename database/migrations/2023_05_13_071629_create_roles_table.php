@@ -13,16 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('materis', function (Blueprint $table) {
+        Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('class_id');
-            $table->string('title', 255);
-            $table->text('description');
-            $table->string('file_materi', 50)->nullable();
-            $table->text('video_materi')->nullable();
+            $table->string('name', 25);
+            $table->string('description', 255);
             $table->timestamps();
-
-            $table->foreign('class_id')->references('id')->on('classes');
+            $table->softDeletes();
         });
     }
 
@@ -33,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('materi');
+        Schema::dropIfExists('roles');
     }
 };
