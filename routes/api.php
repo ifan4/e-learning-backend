@@ -33,27 +33,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     Route::prefix('quizzes')->group(function () {
-        Route::post('/add', [QuizController::class, 'store']);
-        Route::delete('/delete/{id}', [QuizController::class, 'delete']);
-        Route::patch('/update/{quiz_id}', [QuizController::class, 'update']);
-    });
-
-    Route::middleware('admin')->group(function () {
-        Route::prefix('class')->group(function () {
-            Route::post('/add', [ClassController::class, 'store'])->middleware('admin');
-            Route::delete('/delete/{id}', [ClassController::class, 'delete']);
-            Route::patch('/update/{class_id}', [ClassController::class, 'update']);
-        });
-
-        Route::prefix('materi')->group(function () {
-            Route::post('/add', [MateriController::class, 'store']);
-            Route::delete('/delete/{id}', [MateriController::class, 'delete']);
-            Route::patch('/update/{materi_id}', [MateriController::class, 'update']);
-        });
-    });
-
-
-    Route::prefix('quizzes')->group(function () {
         Route::get('/', [QuizController::class, 'index']);
         Route::get('/materi/{materi_id}', [QuizController::class, 'showQuizOnMateri']);
         Route::get('/{quiz_id}', [QuizController::class, 'showQuiz']);
@@ -68,6 +47,29 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::post('/addAllAnswers/{materi_id}', [ScoreController::class, 'addAllAnswers']);
     });
+
+    Route::middleware('admin')->group(function () {
+        Route::prefix('class')->group(function () {
+            Route::post('/add', [ClassController::class, 'store'])->middleware('admin');
+            Route::delete('/delete/{id}', [ClassController::class, 'delete']);
+            Route::patch('/update/{class_id}', [ClassController::class, 'update']);
+        });
+
+        Route::prefix('materi')->group(function () {
+            Route::post('/add', [MateriController::class, 'store']);
+            Route::delete('/delete/{id}', [MateriController::class, 'delete']);
+            Route::patch('/update/{materi_id}', [MateriController::class, 'update']);
+        });
+
+        Route::prefix('quizzes')->group(function () {
+            Route::post('/add', [QuizController::class, 'store']);
+            Route::delete('/delete/{id}', [QuizController::class, 'delete']);
+            Route::patch('/update/{quiz_id}', [QuizController::class, 'update']);
+        });
+    });
+
+
+
 });
 
 Route::prefix('class')->group(function () {
