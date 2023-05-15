@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\userResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,9 +25,7 @@ class UserController extends Controller
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
-            dd('masuk');
         }
-        return $user->createToken("token")->plainTextToken;
 
         return response()->json([
             'data' => $user->loadMissing('role:id,name'),
@@ -40,12 +39,18 @@ class UserController extends Controller
 
         $request->user()->currentAccessToken()->delete();
 
-        return response("Berhasil Logout", 200);
+        return response()->json([
+            'message' => 'Logout successfully',
+            'data' => $request->user()->loadMissing('role:id,name')
+        ]);
     }
 
     public function myData(Request $request)
     {
         $user = Auth::User()->loadMissing("role:id,name");
-        return response()->json($user);
+
+        return response()->json([
+            'data' => $user
+        ]);
     }
 }
