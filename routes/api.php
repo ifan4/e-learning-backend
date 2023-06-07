@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/authentication/login', [UserController::class, 'login']);
 
+//User who has signUp route
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('authentication')->group(function () {
         Route::get('/logout', [UserController::class, 'logout']);
@@ -23,6 +24,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/materi/{materi_id}', [QuizController::class, 'showQuizOnMateri']);
         Route::get('/{quiz_id}', [QuizController::class, 'showQuiz']);
     });
+    Route::prefix('materi')->group(function () {
+        Route::get('/download/{file}', [MateriController::class, 'downloadMateriFile']);
+    });
 
     Route::prefix('quizScores')->group(function () {
         Route::get('/', [ScoreController::class, 'index']);
@@ -32,8 +36,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/update/{score_id}', [ScoreController::class, 'update']);
 
         Route::post('/addAllAnswers/{materi_id}', [ScoreController::class, 'addAllAnswers']);
+        Route::get('/user/materi/{materi_id}', [ScoreController::class, 'userScores']);
+        Route::delete('/delete/materi/{materi_id}', [ScoreController::class, 'deleteQuizzes']);
     });
 
+
+    //Admin route
     Route::middleware('admin')->group(function () {
         Route::prefix('class')->group(function () {
             Route::post('/add', [ClassController::class, 'store'])->middleware('admin');

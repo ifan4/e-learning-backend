@@ -12,7 +12,7 @@ class quizScore extends Model
 
 
     protected $fillable = [
-        'quiz_id', 'user_id', 'score', 'answer'
+        'quiz_id', 'user_id', 'score', 'answer', 'materi_id'
     ];
 
     public function quiz(): BelongsTo
@@ -23,5 +23,10 @@ class quizScore extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function materi(): BelongsTo
+    {
+        return $this->belongsTo(Materi::class, 'materi_id', 'id');
     }
 }

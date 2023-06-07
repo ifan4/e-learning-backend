@@ -6,6 +6,7 @@ use App\Http\Resources\quizResource;
 use App\Http\Resources\scoreResource;
 use App\Models\quiz;
 use App\Models\quizScore;
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -80,7 +81,7 @@ class ScoreController extends Controller
     //This function usable to adding score for general
     public function addScoreForAll(
         $user_answer,
-        $quiz_id
+        $quiz_id,
     ) {
         //define first
         $request = [];
@@ -88,11 +89,13 @@ class ScoreController extends Controller
         $request['quiz_id'] = $quiz_id;
         $request['score'] = 0;
 
-        //find the right answer
-        $correct_answer = quiz::findOrFail($quiz_id)->answer;
 
+        //find the right answer
+        $current_quiz = quiz::findOrFail($quiz_id);
+
+        $request['materi_id'] = $current_quiz->materi_id;
         //calculating user score based his answer
-        ($correct_answer === $user_answer)
+        ($current_quiz->answer === $user_answer)
             ? $request['score'] = 25
             : $request['score'] = 0;
 
@@ -114,7 +117,7 @@ class ScoreController extends Controller
         //Call general function to add data
         $score = $this->addScoreForAll(
             $request->answer,
-            $request->quiz_id
+            $request->quiz_id,
         );
 
         return new scoreResource($score->loadMissing(['user:id,first_name', 'quiz']));
@@ -124,7 +127,7 @@ class ScoreController extends Controller
     public function addAllAnswers(Request $request, $materi_id)
     {
         $validated = $request->validate([
-            'answers' => 'required|array|min:4',
+            // 'answers' => 'required|array|min:4',
             'answers.*.quiz_id' => 'required',
             'answers.*.answer' => 'required'
         ]);
@@ -163,5 +166,52 @@ class ScoreController extends Controller
         $score->update($request->all());
 
         return new scoreResource($score->loadMissing(['user:id,first_name', 'quiz']));
+    }
+
+    // checking Is user has filled quizzes  and will return the score based on materi_id and also user_id who has signIn.
+    public function userScores($materi_id)
+    {
+
+        $user_id = Auth::id();
+        $quiz_scores = quizScore::where('user_id', $user_id)->where('materi_id', $materi_id)->get();
+
+        // if (count($quiz_scores) == 0) {
+        //     return response('Data not found', 404);
+        // }
+
+        $tot_wrongAnswer = 0;
+        $tot_correctAnswer = 0;
+        $tot_score = 0;
+
+        foreach ($quiz_scores as $quiz_score) {
+            if ($quiz_score->score === 0) {
+                $tot_wrongAnswer++;
+            } else {
+                $tot_correctAnswer++;
+            }
+            $tot_score += $quiz_score->score;
+        }
+
+
+        return response()->json([
+            'your_score' => $tot_score,
+            'correct' => $tot_correctAnswer,
+            'wrong' => $tot_wrongAnswer,
+            'data' => $quiz_scores
+        ]);
+    }
+
+    public function deleteQuizzes($materi_id)
+    {
+        $user_id = Auth::id();
+        $quiz_scores = quizScore::where('user_id', $user_id)->where('materi_id', $materi_id);
+        $temp_quiz_scores = $quiz_scores->get();
+
+        $quiz_scores->delete();
+
+        return response()->json([
+            'message' => 'Quizzez Succeessfully Deleted!',
+            'deleted_data' => $temp_quiz_scores
+        ]);
     }
 }

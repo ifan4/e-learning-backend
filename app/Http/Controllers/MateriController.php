@@ -18,6 +18,13 @@ class MateriController extends Controller
         return materiResource::collection($materis);
     }
 
+    public function downloadMateriFile($file)
+    {
+        $file = Storage::download('files/' . $file);
+
+        return $file;
+    }
+
     public function showMateri($materi_id)
     {
 
