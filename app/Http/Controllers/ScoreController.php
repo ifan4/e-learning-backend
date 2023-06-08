@@ -82,6 +82,7 @@ class ScoreController extends Controller
     public function addScoreForAll(
         $user_answer,
         $quiz_id,
+        $scoreFor_1Quiz
     ) {
         //define first
         $request = [];
@@ -93,10 +94,11 @@ class ScoreController extends Controller
         //find the right answer
         $current_quiz = quiz::findOrFail($quiz_id);
 
+
         $request['materi_id'] = $current_quiz->materi_id;
         //calculating user score based his answer
         ($current_quiz->answer === $user_answer)
-            ? $request['score'] = 25
+            ? $request['score'] = $scoreFor_1Quiz
             : $request['score'] = 0;
 
         $request['user_id'] = Auth::user()->id;
@@ -114,10 +116,19 @@ class ScoreController extends Controller
             'quiz_id' => 'required'
         ]);
 
+        $materi_id = quiz::findOrFail($request->quiz_id)->materi_id;
+
+        //calculating score for a quiz
+        $tot_quizzez = quiz::where('materi_id', $materi_id)->count();
+        $scoreFor_1quiz = 100 / $tot_quizzez;
+
+
+
         //Call general function to add data
         $score = $this->addScoreForAll(
             $request->answer,
             $request->quiz_id,
+            $scoreFor_1quiz
         );
 
         return new scoreResource($score->loadMissing(['user:id,first_name', 'quiz']));
@@ -134,10 +145,19 @@ class ScoreController extends Controller
 
         $scores = array();
 
+        //calculating score for a quiz
+        $tot_quizzez = quiz::where('materi_id', $materi_id)->count();
+        $scoreFor_1quiz = 100 / $tot_quizzez;
+
+
         //need looping for input all answers (in array) 
         foreach ($request->answers as $answer) {
             //Call general function to add data
-            $scores[] = $this->addScoreForAll($answer["answer"], $answer["quiz_id"]);
+            $scores[] = $this->addScoreForAll(
+                $answer["answer"],
+                $answer["quiz_id"],
+                $scoreFor_1quiz
+            );
         }
 
         return response()->json([

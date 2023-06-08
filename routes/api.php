@@ -40,7 +40,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/delete/materi/{materi_id}', [ScoreController::class, 'deleteQuizzes']);
     });
 
-
+    
     //Admin route
     Route::middleware('admin')->group(function () {
         Route::prefix('class')->group(function () {
