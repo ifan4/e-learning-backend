@@ -12,12 +12,16 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::post('/authentication/login', [UserController::class, 'login']);
+Route::post('/authentication/register', [UserController::class, 'register']);
 
 //User who has signUp route
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('authentication')->group(function () {
         Route::get('/logout', [UserController::class, 'logout']);
+    });
+    Route::prefix('profile')->group(function () {
         Route::get('/me', [UserController::class, 'myData']);
+        Route::patch('/update', [UserController::class, 'updateProfile']);
     });
 
     Route::prefix('quizzes')->group(function () {
@@ -32,15 +36,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/', [ScoreController::class, 'index']);
         Route::get('/{quiz_id}/{user_id}', [ScoreController::class, 'showScore']);
         Route::get('/{materi_id}', [ScoreController::class, 'showScore']);
-        Route::post('/add', [ScoreController::class, 'addScore']);
         Route::patch('/update/{score_id}', [ScoreController::class, 'update']);
 
         Route::post('/addAllAnswers/{materi_id}', [ScoreController::class, 'addAllAnswers']);
         Route::get('/user/materi/{materi_id}', [ScoreController::class, 'userScores']);
         Route::delete('/delete/materi/{materi_id}', [ScoreController::class, 'deleteQuizzes']);
+        Route::get('/summary/quizzes/score', [ScoreController::class, 'summaryQuizzesScore']);
     });
 
-    
+
+
     //Admin route
     Route::middleware('admin')->group(function () {
         Route::prefix('class')->group(function () {
@@ -50,6 +55,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
 
         Route::prefix('materi')->group(function () {
+            // Route::get('/{id}', [MateriController::class, '']);
             Route::post('/add', [MateriController::class, 'store']);
             Route::delete('/delete/{id}', [MateriController::class, 'delete']);
             Route::patch('/update/{materi_id}', [MateriController::class, 'update']);
@@ -64,6 +70,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::prefix('dashboard')->group(function () {
             Route::get('/totalData', [DashboardController::class, 'getTotalData']);
+        });
+
+        Route::prefix('users')->group(function () {
+            Route::get('/', [UserController::class, 'getAllUsers']);
         });
     });
 });

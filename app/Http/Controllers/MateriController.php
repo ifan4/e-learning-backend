@@ -25,17 +25,19 @@ class MateriController extends Controller
         return $file;
     }
 
-    public function showMateri($materi_id)
+    public function showMateri(Request $request, $materi_id)
     {
 
         $materi = Materi::with('class:id,name')->findOrFail($materi_id);
+        $withQuizzes = $request->with_quizzes;
 
-        return new materiResource($materi);
+        return new materiResource(($withQuizzes === 'true') ? $materi->loadMissing('quizzes') : $materi);
+        // return new materiResource($materi);
     }
 
     public function store(Request $request)
     {
-
+        // return response()->json($request);
         $validated = $request->validate([
             'class_id' => 'required',
             'title' => 'required|max:255',

@@ -29,11 +29,14 @@ class scoreResource extends JsonResource
     {
 
 
+
         return [
             'id' => $this->id,
+            'materi' => $request->query('withMateri') ? $this->materi->loadMissing('class:id,name') : $this->whenLoaded('materi'),
             'quiz' => $this->quiz,
             'user' => [
                 'id' => $this->user->id,
+                'email' => $this->user->email,
                 'fullname' => $this->joinFullname(
                     $this->user->first_name,
                     $this->user->last_name
@@ -41,7 +44,8 @@ class scoreResource extends JsonResource
                 'nisn' => $this->user->nisn
             ],
             'score' => $this->score,
-            'answer' => $this->answer
+            'answer' => $this->answer,
+            'created_at' => $this->created_at
         ];
     }
 }
