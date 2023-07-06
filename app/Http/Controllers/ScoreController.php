@@ -4,11 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\quizResource;
 use App\Http\Resources\scoreResource;
+use App\Models\Class_model;
+use App\Models\Materi;
 use App\Models\quiz;
 use App\Models\quizScore;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Contracts\Database\Eloquent\Builder;
+use function PHPSTORM_META\type;
 
 class ScoreController extends Controller
 {
@@ -17,22 +21,18 @@ class ScoreController extends Controller
     public function index(Request $request)
     {
         $scores = [];
+        $withMateri = $request->withMateri;
 
-        //If there's no query params, so return all data
-        if (
-            !$request->query()
-        ) {
-            $scores = quizScore::all();
-        }
 
         //if there are correct query params, so return based on queries
-        elseif (
+        if (
             $request->query("user_id") ||
             $request->query("materi_id") ||
             $request->query("quiz_id")
         ) {
             //Declaration first
             $scores = quizScore::query();
+
             $user_id = ($request->user_id) ? $request->user_id : null;
             global $materi_id;
             $materi_id = ($request->materi_id) ? $request->materi_id : null;
@@ -55,6 +55,13 @@ class ScoreController extends Controller
 
             $scores = $scores->get();
         }
+        //If there's no query params, so return all data
+        else if (
+            !$request->query() || $request->query('withMateri')
+        ) {
+            $scores = quizScore::all();
+        }
+
 
         return ($scores->count() > 0) ? scoreResource::collection($scores) : response([
             'message' => 'Data not found',
@@ -90,10 +97,8 @@ class ScoreController extends Controller
         $request['quiz_id'] = $quiz_id;
         $request['score'] = 0;
 
-
         //find the right answer
         $current_quiz = quiz::findOrFail($quiz_id);
-
 
         $request['materi_id'] = $current_quiz->materi_id;
         //calculating user score based his answer
@@ -109,30 +114,6 @@ class ScoreController extends Controller
         return $score;
     }
 
-    //add score to user who have done with their quiz
-    public function addScore(Request $request)
-    {
-        $validated = $request->validate([
-            'quiz_id' => 'required'
-        ]);
-
-        $materi_id = quiz::findOrFail($request->quiz_id)->materi_id;
-
-        //calculating score for a quiz
-        $tot_quizzez = quiz::where('materi_id', $materi_id)->count();
-        $scoreFor_1quiz = 100 / $tot_quizzez;
-
-
-
-        //Call general function to add data
-        $score = $this->addScoreForAll(
-            $request->answer,
-            $request->quiz_id,
-            $scoreFor_1quiz
-        );
-
-        return new scoreResource($score->loadMissing(['user:id,first_name', 'quiz']));
-    }
 
     //add all answers from users and it will calculate the score directly 
     public function addAllAnswers(Request $request, $materi_id)
@@ -218,6 +199,38 @@ class ScoreController extends Controller
             'correct' => $tot_correctAnswer,
             'wrong' => $tot_wrongAnswer,
             'data' => $quiz_scores
+        ]);
+    }
+
+    public function summaryQuizzesScore()
+    {
+        $user_id = Auth::id();
+        $quizScores = quizScore::where('user_id', $user_id)->get();
+
+        $average = 0;
+        $tot_quizScores = 0;
+        $tot_wrong = 0;
+        $tot_correct = 0;
+        $materi_id_array = array();
+        //calculate 
+        foreach ($quizScores as $quizScore) {
+            $quizScore->score !== 0
+                ? $tot_correct++
+                : $tot_wrong++;
+            $search = array_search($quizScore->materi_id, $materi_id_array);
+            if (!$search && gettype($search) !== 'integer') {
+                array_push($materi_id_array, $quizScore->materi_id);
+            }
+            $tot_quizScores += $quizScore->score;
+        }
+
+        $average = $tot_quizScores / count($materi_id_array);
+
+        return response()->json([
+            'average_score' => number_format((float)$average, 2, '.', ''),
+            'total_correct' => $tot_correct,
+            'total_wrong' => $tot_wrong,
+            'total_quizzes' => count($materi_id_array)
         ]);
     }
 

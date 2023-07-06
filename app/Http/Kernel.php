@@ -47,7 +47,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
 
             //cors
-            // \Illuminate\Http\Middleware\HandleCors::class
+            \Illuminate\Http\Middleware\HandleCors::class
         ],
     ];
 

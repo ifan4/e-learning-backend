@@ -21,7 +21,8 @@ class materiResource extends JsonResource
             'file_materi' => $this->file_materi,
             'video_materi' => $this->video_materi,
             'created_at' => $this->created_at,
-            'class' => $this->class
+            'class' => $this->class,
+            'quizzes' => $this->whenLoaded('quizzes')
         ];
     }
 }
