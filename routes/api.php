@@ -4,6 +4,7 @@ use App\Http\Controllers\ClassController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MateriController;
 use App\Http\Controllers\QuizController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ScoreController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -74,6 +75,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::prefix('users')->group(function () {
             Route::get('/', [UserController::class, 'getAllUsers']);
+        });
+
+        Route::prefix('roles')->group(function () {
+            Route::get('/', [RoleController::class, 'index']);
+            Route::get('/{id}', [RoleController::class, 'showDetail']);
         });
     });
 });
