@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ClassController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MateriController;
@@ -77,6 +78,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/', [UserController::class, 'getAllUsers']);
         });
 
+        Route::prefix('admins')->group(function () {
+            Route::get('/', [AdminController::class, 'index']);
+            Route::get('/showDetails/{id}', [AdminController::class, 'showDetail']);
+            Route::patch('/changeTo', [AdminController::class, 'changeTo']);
+        });
+
         Route::prefix('roles')->group(function () {
             Route::get('/', [RoleController::class, 'index']);
             Route::get('/{id}', [RoleController::class, 'showDetail']);
@@ -93,3 +100,5 @@ Route::prefix('materi')->group(function () {
     Route::get('/classes/{class_id}', [MateriController::class, 'index']);
     Route::get('/{materi_id}', [MateriController::class, 'showMateri']);
 });
+
+Route::patch('/addAdmin', [AdminController::class, 'changeTo']);
