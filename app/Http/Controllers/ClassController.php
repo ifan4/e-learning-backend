@@ -11,7 +11,7 @@ class ClassController extends Controller
     public function index(Request $request)
     {
 
-        $classes = Class_model::all();
+        $classes = Class_model::all()->loadMissing('Category:id,name');
         $withMateris = $request->with_materis;
 
         return classResource::collection(($withMateris === 'true') ? $classes->loadMissing('materis') : $classes);
@@ -20,7 +20,7 @@ class ClassController extends Controller
     public function showDetail(Request $request, $id)
     {
 
-        $class = Class_model::findOrFail($id);
+        $class = Class_model::findOrFail($id)->loadMissing('Category:id,name');
         $withMateris = $request->with_materis;
 
         // return response()->json($class);
@@ -32,27 +32,29 @@ class ClassController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|max:255',
-            'description' => 'required'
+            'description' => 'required',
+            'category_id' => 'required|exists:App\Models\Category,id'
         ]);
 
 
         $class = Class_model::create($request->all());
 
-        return new classResource($class);
+        return new classResource($class->loadMissing('Category:id,name'));
     }
 
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
             'name' => 'required|max:255',
-            'description' => 'required'
+            'description' => 'required',
+            'category_id' => 'required|exists:App\Models\Category,id'
         ]);
 
         $class = Class_model::findOrFail($id);
 
         $class->update($request->all());
 
-        return new classResource($class);
+        return new classResource($class->loadMissing('Category:id,name'));
     }
 
     public function delete($id)
@@ -62,6 +64,6 @@ class ClassController extends Controller
 
         $class->delete();
 
-        return new classResource($class);
+        return new classResource($class->loadMissing('Category:id,name'));
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClassController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MateriController;
@@ -88,6 +89,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/', [RoleController::class, 'index']);
             Route::get('/{id}', [RoleController::class, 'showDetail']);
         });
+        Route::prefix('categories')->group(function () {
+            Route::POST('/add', [CategoryController::class, 'createCategory']);
+            Route::patch('/update/{category_id}', [CategoryController::class, 'update']);
+            Route::delete('/delete/{category_id}', [CategoryController::class, 'delete']);
+        });
     });
 });
 
@@ -100,5 +106,11 @@ Route::prefix('materi')->group(function () {
     Route::get('/classes/{class_id}', [MateriController::class, 'index']);
     Route::get('/{materi_id}', [MateriController::class, 'showMateri']);
 });
+Route::prefix('categories')->group(function () {
+    Route::get('/', [CategoryController::class, 'index']);
+    Route::get('/detail/{category_id}', [CategoryController::class, 'showDetail']);
+});
+
+
 
 Route::patch('/addAdmin', [AdminController::class, 'changeTo']);
