@@ -185,7 +185,7 @@ class ScoreController extends Controller
         $tot_score = 0;
 
         foreach ($quiz_scores as $quiz_score) {
-            if ($quiz_score->score === 0) {
+            if ($quiz_score->score === '0') {
                 $tot_wrongAnswer++;
             } else {
                 $tot_correctAnswer++;
@@ -214,7 +214,7 @@ class ScoreController extends Controller
         $materi_id_array = array();
         //calculate 
         foreach ($quizScores as $quizScore) {
-            $quizScore->score !== 0
+            $quizScore->score !== '0'
                 ? $tot_correct++
                 : $tot_wrong++;
             $search = array_search($quizScore->materi_id, $materi_id_array);
